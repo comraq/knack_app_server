@@ -1,7 +1,8 @@
 var express = require("express"),
     fs = require("fs");
 
-var app = express();
+var app = express(),
+    port = process.env.PORT || 8080;
 
 app.get("*", function(req, res) {
   var query = req.url.substring(1), fn = "";
@@ -28,4 +29,4 @@ app.get("*", function(req, res) {
     res.end(data);
   });
 });
-app.listen(7777);
+app.listen(port);
