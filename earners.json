@@ -1,0 +1,44 @@
+{
+  "earners": [
+    {
+      "name": "earner1",
+      "location": "address1",
+      "id": 1,
+      "badges": [1, 2, 3, 4],
+      "img": "earner1.jpg",
+      "contact": "earner1@example.org"
+    },
+    {
+      "name": "earner2",
+      "location": "address2",
+      "id": 2,
+      "badges": [3],
+      "img": "earner2.jpg",
+      "contact": "earner2@example.org"
+    },
+    {
+      "name": "earner3",
+      "location": "address3",
+      "id": 3,
+      "badges": [2, 3, 7],
+      "img": "earner3.jpg",
+      "contact": "earner3@example.org"
+    },
+    {
+      "name": "earner4",
+      "location": "address4",
+      "id": 4,
+      "badges": [1, 5],
+      "img": "earner4.jpg",
+      "contact": "earner4@example.org"
+    },
+    {
+      "name": "earner5",
+      "location": "address5",
+      "id": 5,
+      "badges": [6],
+      "img": "earner5.jpg",
+      "contact": "earner5@example.org"
+    }
+  ]
+}

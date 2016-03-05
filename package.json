@@ -1,0 +1,15 @@
+{
+  "name": "knack_app",
+  "version": "1.0.0",
+  "description": "node server for vanhacks knack-app",
+  "main": "knackApp.js",
+  "dependencies": {
+    "express": "^4.13.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Team17",
+  "license": "MIT"
+}
