@@ -18,7 +18,7 @@ var http = require("http")
       size = 6;
       break;
     case "badges":
-      size = 9;
+      size = 10;
       break;
   }
 
@@ -88,14 +88,25 @@ function sendOneRequest(arr, index, cb) {
         appendStr = "";
     }
     var varStr = prop;
-    if (prop == "contact") {
+    if (prop == "name") {
+      if (arr[3] !== undefined)
+        entry[prop] = arr[3].slice(0, -1) + index + appendStr;
+      else
+        entry[prop] = arr[2].slice(0, -1) + index + appendStr;
+
+    } else if (prop == "description")
+      entry[prop] = entry.name + appendStr;
+
+    else if (prop == "employer")
+      entry[prop] = varStr + (index % 2 + 1) + appendStr;
+
+    else if (prop == "contact") {
       if (arr[3] !== undefined)
         entry[prop] = entry.employer + appendStr;
       else
         entry[prop] = entry.name + appendStr;
-    } else if (prop == "employer")
-      entry[prop] = varStr + (index % 2 + 1) + appendStr;
-    else
+
+    } else
       entry[prop] = varStr + index + appendStr;
   }
   entry.id = parseInt(index);

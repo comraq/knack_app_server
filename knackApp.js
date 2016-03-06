@@ -73,7 +73,7 @@ app.post("*", function(req, res) {
 
   readJson(fn, updateJson);
   function updateJson(data) {
-    var id = req.body.id;
+    var id = req.body.id, del = req.body["delete"];
     if (id === undefined) {
       res.writeHead(400, {"Content-Type": "text/plain"});
       res.end("Bad POST Request! Missing ID for input "
@@ -84,6 +84,15 @@ app.post("*", function(req, res) {
     var targetObj = {id: id};
     data = JSON.parse(data);
 
+    if (del) {
+      for (var i = 0; i < data[type].length; ++i) {
+        if (data[type][i].id == id) {
+          data[type].splice(i, 1);
+          writeJson(fn, JSON.stringify(data), endPost);
+          return;
+        }
+      }
+    }
     //Searching for json in target file by id
     var found = false;
     for (var i = 0; i < data[type].length; ++i) {
@@ -96,13 +105,14 @@ app.post("*", function(req, res) {
     if (!found)
       data[type][data[type].length] = targetObj;
 
-    //console.log("Before: " + JSON.stringify(targetObj));
     //Updating target obj with updated properties in POST body
-    for (var prop in req.body)
-      targetObj[prop] = req.body[prop];
+    for (var prop in req.body) {
+      if (prop == "id")
+        targetObj[prop] = parseInt(req.body[prop]);
+      else
+        targetObj[prop] = req.body[prop];
+    }
 
-    //console.log("After: " + JSON.stringify(targetObj));
-    //console.log("After: " + JSON.stringify(data) + "\n");
     writeJson(fn, JSON.stringify(data), endPost);
   }
 
