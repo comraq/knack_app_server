@@ -61,7 +61,13 @@ $.ajax({
   url: type.toLowerCase(),
   data: JSON.stringify(postObj),
   success: function() {
-    alert("POST Request Successful!");
+    alert("POST Request Success!");
+  },
+  error: function(textStatus, err) {
+    if (textStatus["status"] == 200)
+      alert("POST Request Successful!");
+    else
+      alert("POST Request Error! " + JSON.stringify(textStatus));
   },
   contentType: "application/json",
   dataType: "json"
