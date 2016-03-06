@@ -1,5 +1,6 @@
 var express = require("express"),
     bodyParser = require("body-parser"),
+    path = require("path"),
     fs = require("fs");
 
 var app = express(),
@@ -7,6 +8,15 @@ var app = express(),
     JSON_PATH = "resources/json/";
 
 app.use(bodyParser.json());
+
+app.get("/", function(req, res) {
+  res.sendFile(path.join(__dirname + "/static/index.html"));
+});
+
+app.get("/resources/*", function(req, res) {
+  var fn = req.url;
+  res.sendFile(path.join(__dirname + fn));
+});
 
 app.get("*", function(req, res) {
   var fn = getFn(req);
@@ -38,16 +48,19 @@ function getFn(req) {
 }
 
 app.post("*", function(req, res) {
+  console.log("Received POST Request! url: " + req.url);
   var fn = getFn(req, type);
   if (fn === undefined) {
     res.writeHead(400, {"Content-Type": "text/plain"});
     res.end("Bad POST Request! Unrecognized Query.");
+    console.log("Bad POST Request! Unrecognized Query.");
     return;
   }
 
   if (req.body === undefined) {
     res.writeHead(400, {"Content-Type": "text/plain"});
     res.end("Bad POST Request! Undefined request body.");
+    console.log("Bad POST Request! Undefined request body.");
     return;
   }
 
@@ -57,6 +70,7 @@ app.post("*", function(req, res) {
         || (req.query.type != "tasks" && req.query.type != "workshops")) {
       res.writeHead(400, {"Content-Type": "text/plain"});
       res.end("Bad POST Request! Undefined Activity Type.");
+      console.log("Bad POST Request! Undefined Activity Type.");
       return;
     }
     type = req.query.type;
@@ -78,6 +92,9 @@ app.post("*", function(req, res) {
       res.writeHead(400, {"Content-Type": "text/plain"});
       res.end("Bad POST Request! Missing ID for input "
               + type + " json.");
+      console.log("Bad POST Request! Missing ID for input "
+              + type + " json.");
+      console.log("body: " + JSON.stringify(req.body));
       return;
     }
 
@@ -92,6 +109,7 @@ app.post("*", function(req, res) {
           return;
         }
       }
+      return;
     }
     //Searching for json in target file by id
     var found = false;

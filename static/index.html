@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- JQuery -->
+    <script
+      src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"
+      type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <link href="resources/css/bootstrap.css" rel="stylesheet">
+    <script src="resources/js/bootstrap.js"></script>
+
+    <!-- Custom Scripts -->
+    <script src="resources/js/main.js"></script>
+
+    <title>API Demo Page</title>
+  </head>
+
+  <body>
+    <button type="submit" class="btn btn-primary post-button">Send Update</button>
+    <form id="main-form">
+      <fieldset class="form-group">
+        <label for="dataType">Data Type</label>
+        <select class="form-control" id="dataType">
+          <option>Earners</option>
+          <option>Badges</option>
+          <option>Tasks</option>
+          <option>Workshops</option>
+        </select>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <label for="dataId">ID</label>
+        <input type="dataId" class="form-control"
+          id="dataId" placeholder="Enter Id">
+      </fieldset>
+
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="delCheck">Delete
+        </label>
+      </div>
+
+      <fieldset class="form-group">
+        <label for="dataName">Name</label>
+        <input type="dataName" class="form-control"
+          id="dataName" placeholder="Enter Name">
+      </fieldset>
+    </form>
+  </body>
+</html>

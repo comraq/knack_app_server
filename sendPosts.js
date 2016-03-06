@@ -18,7 +18,7 @@ var http = require("http")
       size = 6;
       break;
     case "badges":
-      size = 10;
+      size = 19;
       break;
   }
 
@@ -53,10 +53,13 @@ function sendOneRequest(arr, index, cb) {
       entry.employer = null;
       entry.contact = null;
       entry["location"] = null;
+      if (type == "tasks")
+        entry.salary = null;
       break;
 
     case "/badges":
       entry.img = null;
+      entry.description = null;
       break;
 
     case "/earners":
@@ -75,9 +78,9 @@ function sendOneRequest(arr, index, cb) {
   var appendStr = "";
   for (var prop in entry) {
     switch(prop) {
-      case "img":
+      /*case "img":
         appendStr = ".jpg";
-        break;
+        break;*/
       case "contact":
         appendStr = "@example.com";
         break;
@@ -95,12 +98,24 @@ function sendOneRequest(arr, index, cb) {
         entry[prop] = arr[2].slice(0, -1) + index + appendStr;
 
     } else if (prop == "description")
-      entry[prop] = entry.name + appendStr;
+      entry[prop] = "This is a description for " + entry.name;
 
     else if (prop == "employer")
       entry[prop] = varStr + (index % 2 + 1) + appendStr;
 
-    else if (prop == "contact") {
+    else if (prop == "salary")
+      entry[prop] = "$1" + (index % 2 + 1) + ".00/hr";
+
+    else if (prop == "img" && arr[2] == "badges") {
+      var prefix = "hs_";
+      var i = index;
+      if (index > 11) {
+        prefix = "ss_";
+        i -= 11;
+      }
+      entry[prop] = prefix + arr[2].slice(0, -1) + i;
+
+    } else if (prop == "contact") {
       if (arr[3] !== undefined)
         entry[prop] = entry.employer + appendStr;
       else
