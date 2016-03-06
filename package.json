@@ -4,6 +4,7 @@
   "description": "node server for vanhacks knack-app",
   "main": "knackApp.js",
   "dependencies": {
+    "body-parser": "^1.15.0",
     "express": "^4.13.4"
   },
   "devDependencies": {},
