@@ -45,6 +45,12 @@ app.post("*", function(req, res) {
     return;
   }
 
+  if (req.body === undefined) {
+    res.writeHead(400, {"Content-Type": "text/plain"});
+    res.end("Bad POST Request! Undefined request body.");
+    return;
+  }
+
   var type;
   if (fn == JSON_PATH + "tasks_workshops.json") {
     if (req.query.type === undefined
@@ -54,6 +60,14 @@ app.post("*", function(req, res) {
       return;
     }
     type = req.query.type;
+
+    var today = new Date(),
+        dd = today.getDate(),
+        mm = today.getMonth() + 1,
+        yyyy = today.getFullYear();
+    mm = (mm < 10)? "0" + mm: mm;
+    dd = (dd < 10)? "0" + dd: dd;
+    req.body.timestamp = mm + "/" + dd + "/" + yyyy;
   } else
     type = req.params[0].substring(1);
 
@@ -71,16 +85,24 @@ app.post("*", function(req, res) {
     data = JSON.parse(data);
 
     //Searching for json in target file by id
+    var found = false;
     for (var i = 0; i < data[type].length; ++i) {
       if (data[type][i].id == id) {
         targetObj = data[type][i];
+        found = true;
         break;
       }
     }
+    if (!found)
+      data[type][data[type].length] = targetObj;
+
+    //console.log("Before: " + JSON.stringify(targetObj));
     //Updating target obj with updated properties in POST body
     for (var prop in req.body)
       targetObj[prop] = req.body[prop];
 
+    //console.log("After: " + JSON.stringify(targetObj));
+    //console.log("After: " + JSON.stringify(data) + "\n");
     writeJson(fn, JSON.stringify(data), endPost);
   }
 
