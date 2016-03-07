@@ -40,13 +40,13 @@ function main() {
         if (inputVal != "") {
           if (fieldSets[i].childNodes[1].classList.contains("badgeList")) {
             inputVal = inputVal.split(",");
-            for (var i = 0; i < inputVal.length; ++i) {
-              var result = parseInt(inputVal[i].trim());
+            for (var j = 0; j < inputVal.length; ++j) {
+              var result = parseInt(inputVal[j].trim());
               if (isNaN(result)) {
                 alert("Badge IDs must be positive numbers!");
                 return;
               } else
-                inputVal[i] = result;
+                inputVal[j] = result;
             }
           }
           postObj[key.toLowerCase()] = inputVal;
