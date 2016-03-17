@@ -12,14 +12,16 @@ function main() {
         case "Earners":
           showEarnersForm(type);
           break;
+        case "Tasks":
+        case "Workshops":
+          showActivitiesForm(type);
+          break;
         default:
-          // TODO: Need to implement POST request to DB
-          //       for Tasks and Workshops
           alert("Input forms for '" + type + "' are not yet implemented");
       }
     }
-    
   });
+
   $(".post-button").click(function() {
     var type = dataType.options[dataType.selectedIndex].value,
         del = document.getElementById("delCheck").checked,
@@ -29,11 +31,6 @@ function main() {
     if (id == "" || isNaN(id)) {
       alert("Invalid ID! ID must be a positive number!");
       return;
-    }
-    if (type == "Tasks" || type == "Workshops") {
-      // TODO: Need to implement POST request to DB for Tasks and Workshops
-      activityType = type;
-      type = "activities"
     }
 
     var postObj = {id: parseInt(id)};
@@ -46,7 +43,7 @@ function main() {
         var key = fieldSets[i].childNodes[0].innerHTML;
         var inputVal = fieldSets[i].childNodes[1].value;
         if (inputVal != "") {
-          if (fieldSets[i].childNodes[1].classList.contains("badgeList")) {
+          if (fieldSets[i].childNodes[1].classList.contains("badgesList")) {
             inputVal = inputVal.split(",");
             for (var j = 0; j < inputVal.length; ++j) {
               var result = parseInt(inputVal[j].trim());
@@ -57,11 +54,16 @@ function main() {
                 inputVal[j] = result;
             }
           }
-          postObj[key.toLowerCase()] = inputVal;
+          postObj[key.toLowerCase().replace(/ /g, "_")] = inputVal;
         }
       }
       if (name != "")
         postObj.name = name;
+    }
+
+    if (type == "Tasks" || type == "Workshops") {
+      activityType = type;
+      type = "activities"
     }
 
     $.ajax({
@@ -87,118 +89,69 @@ function main() {
 function showBadgesForm(classStr) {
   var form = document.getElementById("main-form");
 
-  var img_fieldset = document.createElement("fieldset");
-  img_fieldset.setAttribute("class",
-                            "form-group " + classStr.toLowerCase());
-
-  var img_label = document.createElement("label");
-  img_label.setAttribute("for", "badgeImg");
-  img_label.innerHTML = "Img";
-
-  var img_input = document.createElement("input");
-  img_input.setAttribute("type", "badgeImg");
-  img_input.setAttribute("class", "form-control");
-  img_input.setAttribute("id", "badgeImgId");
-  img_input.setAttribute("placeholder", "Enter Image Resource Name");
-
-  img_fieldset.appendChild(img_label);
-  img_fieldset.appendChild(img_input);
-  form.appendChild(img_fieldset);
-
-  var desc_fieldset = document.createElement("fieldset");
-  desc_fieldset.setAttribute("class",
-                             "form-group " + classStr.toLowerCase());
-
-  var desc_label = document.createElement("label");
-  desc_label.setAttribute("for", "badgeDesc");
-  desc_label.innerHTML = "Description";
-
-  var desc_textarea = document.createElement("textarea");
-  desc_textarea.setAttribute("class", "form-control");
-  desc_textarea.setAttribute("id", "badgeDescId");
-  desc_textarea.setAttribute("placeholder", "Enter Description");
-  desc_textarea.setAttribute("rows", "5");
-
-  desc_fieldset.appendChild(desc_label);
-  desc_fieldset.appendChild(desc_textarea);
-  form.appendChild(desc_fieldset);
+  addDOM(classStr, "Img", "Enter Image Resource Name",
+         createInputDOM, form);
+  addDOM(classStr, "Description", "Enter Description",
+         createTextareaDOM, form);
 }
 
 function showEarnersForm(classStr) {
   var form = document.getElementById("main-form");
 
-  var img_fieldset = document.createElement("fieldset");
-  img_fieldset.setAttribute("class",
-                            "form-group " + classStr.toLowerCase());
+  addDOM(classStr, "Img", "Enter Image Resource Name",
+         createInputDOM, form);
+  addDOM(classStr, "Location", "Enter Location/Address",
+         createInputDOM, form);
+  addDOM(classStr, "Contact", "Enter Contact Email",
+         createInputDOM, form);
 
-  var img_label = document.createElement("label");
-  img_label.setAttribute("for", "earnersImg");
-  img_label.innerHTML = "Img";
+  // Adding badgesList input DOM separately
+  var badgesList_fieldset = createFieldsetDOM(classStr.toLowerCase());
+  var badgesList_input = createInputDOM(classStr.toLowerCase(),
+                                        "Badges",
+                                        "Enter List of Badge Ids "
+                                        + "(example: 1, 2, 3, 4)");
+  badgesList_input.setAttribute("class", "form-control badgesList");
 
-  var img_input = document.createElement("input");
-  img_input.setAttribute("type", "earnersImg");
-  img_input.setAttribute("class", "form-control");
-  img_input.setAttribute("id", "earnersImgId");
-  img_input.setAttribute("placeholder", "Enter Image Resource Name");
+  badgesList_fieldset.appendChild(createLabelDOM(classStr.toLowerCase(),
+                                                 "Badges"));
+  badgesList_fieldset.appendChild(badgesList_input);
+  form.appendChild(badgesList_fieldset);
+}
 
-  img_fieldset.appendChild(img_label);
-  img_fieldset.appendChild(img_input);
-  form.appendChild(img_fieldset);
+function showActivitiesForm(classStr) {
+  var form = document.getElementById("main-form");
 
-  var location_fieldset = document.createElement("fieldset");
-  location_fieldset.setAttribute("class",
-                                 "form-group " + classStr.toLowerCase());
+  addDOM(classStr, "Employer", "Enter Employer Name",
+         createInputDOM, form);
+  addDOM(classStr, "Contact", "Enter Contact Email",
+         createInputDOM, form);
+  addDOM(classStr, "Location", "Enter Location/Address",
+         createInputDOM, form);
 
-  var location_label = document.createElement("label");
-  location_label.setAttribute("for", "earnersLocation");
-  location_label.innerHTML = "Location";
+  var badgesLabelText;
+  if (classStr == "Tasks") {
+    addDOM(classStr, "Salary", "Enter Remuneration Rate",
+           createInputDOM, form);
+    badgesLabelText = "Required Badges";
+  } else
+    badgesLabelText = "Awarded Badges";
 
-  var location_input = document.createElement("input");
-  location_input.setAttribute("type", "earnersLocation");
-  location_input.setAttribute("class", "form-control");
-  location_input.setAttribute("id", "earnersLocationId");
-  location_input.setAttribute("placeholder", "Enter Location/Address");
+  // Adding badgesList input DOM separately
+  var badgesList_fieldset = createFieldsetDOM(classStr.toLowerCase());
+  var badgesList_input = createInputDOM(classStr.toLowerCase(),
+                                        badgesLabelText,
+                                        "Enter List of Badge Ids "
+                                        + "(example: 1, 2, 3, 4)");
+  badgesList_input.setAttribute("class", "form-control badgesList");
 
-  location_fieldset.appendChild(location_label);
-  location_fieldset.appendChild(location_input);
-  form.appendChild(location_fieldset);
+  badgesList_fieldset.appendChild(createLabelDOM(classStr.toLowerCase(),
+                                                 badgesLabelText));
+  badgesList_fieldset.appendChild(badgesList_input);
+  form.appendChild(badgesList_fieldset);
 
-  var contact_fieldset = document.createElement("fieldset");
-  contact_fieldset.setAttribute("class",
-                                "form-group " + classStr.toLowerCase());
-
-  var contact_label = document.createElement("label");
-  contact_label.setAttribute("for", "earnersContact");
-  contact_label.innerHTML = "Contact";
-
-  var contact_input = document.createElement("input");
-  contact_input.setAttribute("type", "earnersContact");
-  contact_input.setAttribute("class", "form-control");
-  contact_input.setAttribute("id", "earnersContactId");
-  contact_input.setAttribute("placeholder", "Enter Contact Email");
-
-  contact_fieldset.appendChild(contact_label);
-  contact_fieldset.appendChild(contact_input);
-  form.appendChild(contact_fieldset);
-
-  var badgeList_fieldset = document.createElement("fieldset");
-  badgeList_fieldset.setAttribute("class",
-                                  "form-group " + classStr.toLowerCase());
-
-  var badgeList_label = document.createElement("label");
-  badgeList_label.setAttribute("for", "earnersBadgeList");
-  badgeList_label.innerHTML = "Badges";
-
-  var badgeList_input = document.createElement("input");
-  badgeList_input.setAttribute("type", "earnersBadgeList");
-  badgeList_input.setAttribute("class", "form-control badgeList");
-  badgeList_input.setAttribute("id", "earnersBadgeListId");
-  badgeList_input.setAttribute("placeholder", "Enter List of Badge Ids "
-                               + "(example: 1, 2, 3, 4)");
-
-  badgeList_fieldset.appendChild(badgeList_label);
-  badgeList_fieldset.appendChild(badgeList_input);
-  form.appendChild(badgeList_fieldset);
+  addDOM(classStr, "Description", "Enter Description",
+         createTextareaDOM, form);
 }
 
 function removeForms() {
@@ -230,6 +183,46 @@ function removeForms() {
     while (child.length > 0)
       form.removeChild(child[0]);
   }
+}
+
+function addDOM(classStr, labelText, hintText, createDOMFunc, parentDOM) {
+  classStr = classStr.toLowerCase();
+  var fieldset = createFieldsetDOM(classStr);
+  fieldset.appendChild(createLabelDOM(classStr, labelText));
+  fieldset.appendChild(createDOMFunc(classStr, labelText, hintText));
+  parentDOM.appendChild(fieldset);
+}
+
+function createFieldsetDOM(classStr) {
+  var fieldset = document.createElement("fieldset");
+  fieldset.setAttribute("class", "form-group " + classStr);
+  return fieldset;
+}
+
+function createLabelDOM(classStr, labelText) {
+  var label = document.createElement("label");
+  label.setAttribute("for", classStr + labelText);
+  label.innerHTML = labelText;
+  return label;
+}
+
+function createInputDOM(classStr, labelText, hintText) {
+  var type = classStr + labelText;
+  var input = document.createElement("input");
+  input.setAttribute("type", type);
+  input.setAttribute("class", "form-control");
+  input.setAttribute("id", type + "Id");
+  input.setAttribute("placeholder", hintText);
+  return input;
+}
+
+function createTextareaDOM(classStr, labelText, hintText) {
+  var textarea = document.createElement("textarea");
+  textarea.setAttribute("class", "form-control");
+  textarea.setAttribute("id", classStr + labelText + "Id");
+  textarea.setAttribute("placeholder", hintText);
+  textarea.setAttribute("rows", "5");
+  return textarea;
 }
 
 $(document).ready(main);
