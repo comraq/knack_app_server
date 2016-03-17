@@ -1,10 +1,13 @@
 var express = require("express"),
     bodyParser = require("body-parser"),
     path = require("path"),
+    mongoWrapper = require("./my_mongo_connector/mongoWrapper"),
     fs = require("fs");
 
 var app = express(),
     port = process.argv[2] || process.env.PORT || 8080,
+    dbClient = mongoWrapper.client(),
+    COLL_PREFIX = "knack_",
     JSON_PATH = "resources/json/";
 
 app.use(bodyParser.json());
@@ -19,6 +22,8 @@ app.get("/resources/*", function(req, res) {
 });
 
 app.get("*", function(req, res) {
+  console.log("Received GET request! URL: " + req.url);
+
   var fn = getFn(req);
   if (fn === undefined) {
     //Bad Request
@@ -28,11 +33,33 @@ app.get("*", function(req, res) {
   }
 
   readJson(fn, endGet);
+
+/*
+  var coll = getColl(req);
+  if (coll === undefined) {
+    //Bad Request
+    res.writeHead(400, {"Content-Type": "text/plain"});
+    res.end("Bad GET Request! Unrecognized Query.");
+    return;
+  }
+*/
+
   function endGet(data) {
     res.writeHead(200, {"Content-Type": "application/json"});
     res.end(data); 
   }
 });
+
+function getColl(req) {
+  switch (req.params[0]) {
+    case "/activities":
+    case "/badges":
+    case "/earners":
+      return COLL_PREFIX + req.params[0].slice(1);
+    default:
+      //Bad Query
+  }
+}
 
 function getFn(req) {
   switch (req.params[0]) {
@@ -85,6 +112,37 @@ app.post("*", function(req, res) {
   } else
     type = req.params[0].substring(1);
 
+  function endPost(err, results) {
+    if (err) {
+      res.writeHead(400, {"Content-Type": "text/plain"});
+      res.end("Error updating database!"); 
+    }
+
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.end(JSON.stringify(results));
+  }
+
+  var keyId = req.body.id, del = req.body["delete"];
+  if (keyId === undefined) {
+    res.writeHead(400, {"Content-Type": "text/plain"});
+    res.end("Bad POST Request! Missing ID for input "
+            + type + " json.");
+    console.log("Bad POST Request! Missing ID for input "
+            + type + " json.");
+    console.log("body: " + JSON.stringify(req.body));
+    return;
+  }
+
+  var coll = COLL_PREFIX + type;
+  if (del)
+    dbClient.deleteOne(coll, {id: keyId}, endPost);
+  else {
+    console.log("collection: " + coll);
+    console.log(req.body);
+    dbClient.updateOne(coll, req.body, endPost);
+  }
+
+/*
   readJson(fn, updateJson);
   function updateJson(data) {
     var id = req.body.id, del = req.body["delete"];
@@ -133,11 +191,8 @@ app.post("*", function(req, res) {
 
     writeJson(fn, JSON.stringify(data), endPost);
   }
+*/
 
-  function endPost(data) {
-    res.writeHead(200, {"Content-Type": "application/json"});
-    res.end(data); 
-  }
 });
 
 function readJson(fn, cb) {

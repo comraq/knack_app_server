@@ -13,19 +13,27 @@ function main() {
           showEarnersForm(type);
           break;
         default:
+          // TODO: Need to implement POST request to DB
+          //       for Tasks and Workshops
           alert("Input forms for '" + type + "' are not yet implemented");
       }
     }
     
   });
   $(".post-button").click(function() {
-    var type = dataType.options[dataType.selectedIndex].value;
-    var del = document.getElementById("delCheck").checked;
-    var id = document.getElementById("dataId").value;
-    var name = document.getElementById("dataName").value;
+    var type = dataType.options[dataType.selectedIndex].value,
+        del = document.getElementById("delCheck").checked,
+        id = document.getElementById("dataId").value,
+        name = document.getElementById("dataName").value,
+        activityType;
     if (id == "" || isNaN(id)) {
       alert("Invalid ID! ID must be a positive number!");
       return;
+    }
+    if (type == "Tasks" || type == "Workshops") {
+      // TODO: Need to implement POST request to DB for Tasks and Workshops
+      activityType = type;
+      type = "activities"
     }
 
     var postObj = {id: parseInt(id)};
@@ -56,23 +64,22 @@ function main() {
         postObj.name = name;
     }
 
-$.ajax({
-  type: "POST",
-  url: type.toLowerCase(),
-  data: JSON.stringify(postObj),
-  success: function() {
-    alert("POST Request Success!");
-  },
-  error: function(textStatus, err) {
-    if (textStatus["status"] == 200)
-      alert("POST Request Successful!");
-    else
-      alert("POST Request Error! " + JSON.stringify(textStatus));
-  },
-  contentType: "application/json",
-  dataType: "json"
-});
-
+    $.ajax({
+      type: "POST",
+      url: type.toLowerCase(),
+      data: JSON.stringify(postObj),
+      success: function() {
+        alert("POST Request Success!");
+      },
+      error: function(textStatus, err) {
+        if (textStatus["status"] == 200)
+          alert("POST Request Successful!");
+        else
+          alert("POST Request Error! " + JSON.stringify(textStatus));
+      },
+      contentType: "application/json",
+      dataType: "json"
+    });
   });
 }
 
@@ -80,7 +87,8 @@ function showBadgesForm(classStr) {
   var form = document.getElementById("main-form");
 
   var img_fieldset = document.createElement("fieldset");
-  img_fieldset.setAttribute("class", "form-group " + classStr.toLowerCase());
+  img_fieldset.setAttribute("class",
+                            "form-group " + classStr.toLowerCase());
 
   var img_label = document.createElement("label");
   img_label.setAttribute("for", "badgeImg");
@@ -97,7 +105,8 @@ function showBadgesForm(classStr) {
   form.appendChild(img_fieldset);
 
   var desc_fieldset = document.createElement("fieldset");
-  desc_fieldset.setAttribute("class", "form-group " + classStr.toLowerCase());
+  desc_fieldset.setAttribute("class",
+                             "form-group " + classStr.toLowerCase());
 
   var desc_label = document.createElement("label");
   desc_label.setAttribute("for", "badgeDesc");
@@ -118,7 +127,8 @@ function showEarnersForm(classStr) {
   var form = document.getElementById("main-form");
 
   var img_fieldset = document.createElement("fieldset");
-  img_fieldset.setAttribute("class", "form-group " + classStr.toLowerCase());
+  img_fieldset.setAttribute("class",
+                            "form-group " + classStr.toLowerCase());
 
   var img_label = document.createElement("label");
   img_label.setAttribute("for", "earnersImg");
@@ -135,7 +145,8 @@ function showEarnersForm(classStr) {
   form.appendChild(img_fieldset);
 
   var location_fieldset = document.createElement("fieldset");
-  location_fieldset.setAttribute("class", "form-group " + classStr.toLowerCase());
+  location_fieldset.setAttribute("class",
+                                 "form-group " + classStr.toLowerCase());
 
   var location_label = document.createElement("label");
   location_label.setAttribute("for", "earnersLocation");
@@ -152,7 +163,8 @@ function showEarnersForm(classStr) {
   form.appendChild(location_fieldset);
 
   var contact_fieldset = document.createElement("fieldset");
-  contact_fieldset.setAttribute("class", "form-group " + classStr.toLowerCase());
+  contact_fieldset.setAttribute("class",
+                                "form-group " + classStr.toLowerCase());
 
   var contact_label = document.createElement("label");
   contact_label.setAttribute("for", "earnersContact");
@@ -169,7 +181,8 @@ function showEarnersForm(classStr) {
   form.appendChild(contact_fieldset);
 
   var badgeList_fieldset = document.createElement("fieldset");
-  badgeList_fieldset.setAttribute("class", "form-group " + classStr.toLowerCase());
+  badgeList_fieldset.setAttribute("class",
+                                  "form-group " + classStr.toLowerCase());
 
   var badgeList_label = document.createElement("label");
   badgeList_label.setAttribute("for", "earnersBadgeList");
