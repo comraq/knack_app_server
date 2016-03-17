@@ -16,7 +16,10 @@ app.get("/", function(req, res) {
   res.sendFile(path.join(__dirname + "/static/index.html"));
 });
 
+// Routing required for API demo page
 app.get("/resources/*", function(req, res) {
+  console.log("Received GET request! URL: " + req.url);
+
   var fn = req.url;
   res.sendFile(path.join(__dirname + fn));
 });
@@ -24,25 +27,31 @@ app.get("/resources/*", function(req, res) {
 app.get("*", function(req, res) {
   console.log("Received GET request! URL: " + req.url);
 
-  var fn = getFn(req);
-  if (fn === undefined) {
+  var colls = getColl(req);
+  if (colls === undefined) {
     //Bad Request
     res.writeHead(400, {"Content-Type": "text/plain"});
     res.end("Bad GET Request! Unrecognized Query.");
     return;
   }
 
-  readJson(fn, endGet);
+  var resJson = {};
+  (function queryDbRecurse(i) {
+    dbClient.find(colls[i], null, { _id: 0 }, function(err, docs) {
+      if (err) {
+        // Error Quering Database
+        res.writeHead(400, {"Content-Type": "text/plain"});
+        res.end("Error Querying Database for " + e + " collection !");
+        return;
+      }
+      resJson[colls[i].slice(COLL_PREFIX.length)] = docs;
 
-/*
-  var coll = getColl(req);
-  if (coll === undefined) {
-    //Bad Request
-    res.writeHead(400, {"Content-Type": "text/plain"});
-    res.end("Bad GET Request! Unrecognized Query.");
-    return;
-  }
-*/
+      if (i == colls.length - 1)
+        endGet(JSON.stringify(resJson));
+      else
+        queryDbRecurse(i + 1);
+    });
+  })(0);
 
   function endGet(data) {
     res.writeHead(200, {"Content-Type": "application/json"});
@@ -53,22 +62,10 @@ app.get("*", function(req, res) {
 function getColl(req) {
   switch (req.params[0]) {
     case "/activities":
+      return [COLL_PREFIX + "tasks", COLL_PREFIX + "workshops"];
     case "/badges":
     case "/earners":
-      return COLL_PREFIX + req.params[0].slice(1);
-    default:
-      //Bad Query
-  }
-}
-
-function getFn(req) {
-  switch (req.params[0]) {
-    case "/activities":
-      return JSON_PATH + "tasks_workshops.json";
-    case "/badges":
-      return JSON_PATH + "badges.json";
-    case "/earners":
-      return JSON_PATH + "earners.json";
+      return [COLL_PREFIX + req.params[0].slice(1)];
     default:
       //Bad Query
   }
@@ -76,11 +73,12 @@ function getFn(req) {
 
 app.post("*", function(req, res) {
   console.log("Received POST Request! url: " + req.url);
-  var fn = getFn(req, type);
-  if (fn === undefined) {
+
+  var colls = getColl(req);
+  if (colls === undefined) {
+    //Bad Request
     res.writeHead(400, {"Content-Type": "text/plain"});
-    res.end("Bad POST Request! Unrecognized Query.");
-    console.log("Bad POST Request! Unrecognized Query.");
+    res.end("Bad GET Request! Unrecognized Query.");
     return;
   }
 
@@ -92,7 +90,7 @@ app.post("*", function(req, res) {
   }
 
   var type;
-  if (fn == JSON_PATH + "tasks_workshops.json") {
+  if (colls.length == 2) {
     if (req.query.type === undefined
         || (req.query.type != "tasks" && req.query.type != "workshops")) {
       res.writeHead(400, {"Content-Type": "text/plain"});
@@ -112,16 +110,6 @@ app.post("*", function(req, res) {
   } else
     type = req.params[0].substring(1);
 
-  function endPost(err, results) {
-    if (err) {
-      res.writeHead(400, {"Content-Type": "text/plain"});
-      res.end("Error updating database!"); 
-    }
-
-    res.writeHead(200, {"Content-Type": "application/json"});
-    res.end(JSON.stringify(results));
-  }
-
   var keyId = req.body.id, del = req.body["delete"];
   if (keyId === undefined) {
     res.writeHead(400, {"Content-Type": "text/plain"});
@@ -136,79 +124,18 @@ app.post("*", function(req, res) {
   var coll = COLL_PREFIX + type;
   if (del)
     dbClient.deleteOne(coll, {id: keyId}, endPost);
-  else {
-    console.log("collection: " + coll);
-    console.log(req.body);
+  else
     dbClient.updateOne(coll, req.body, endPost);
-  }
 
-/*
-  readJson(fn, updateJson);
-  function updateJson(data) {
-    var id = req.body.id, del = req.body["delete"];
-    if (id === undefined) {
+  function endPost(err, results) {
+    if (err) {
       res.writeHead(400, {"Content-Type": "text/plain"});
-      res.end("Bad POST Request! Missing ID for input "
-              + type + " json.");
-      console.log("Bad POST Request! Missing ID for input "
-              + type + " json.");
-      console.log("body: " + JSON.stringify(req.body));
-      return;
+      res.end("Error updating database!"); 
     }
 
-    var targetObj = {id: id};
-    data = JSON.parse(data);
-
-    if (del) {
-      for (var i = 0; i < data[type].length; ++i) {
-        if (data[type][i].id == id) {
-          data[type].splice(i, 1);
-          writeJson(fn, JSON.stringify(data), endPost);
-          return;
-        }
-      }
-      return;
-    }
-    //Searching for json in target file by id
-    var found = false;
-    for (var i = 0; i < data[type].length; ++i) {
-      if (data[type][i].id == id) {
-        targetObj = data[type][i];
-        found = true;
-        break;
-      }
-    }
-    if (!found)
-      data[type][data[type].length] = targetObj;
-
-    //Updating target obj with updated properties in POST body
-    for (var prop in req.body) {
-      if (prop == "id")
-        targetObj[prop] = parseInt(req.body[prop]);
-      else
-        targetObj[prop] = req.body[prop];
-    }
-
-    writeJson(fn, JSON.stringify(data), endPost);
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.end(JSON.stringify(results));
   }
-*/
-
 });
-
-function readJson(fn, cb) {
-  fs.readFile(fn, "utf8", function(err, data) {
-    if (err) throw err;
-
-    cb(data);
-  });
-}
-
-function writeJson(fn, data, cb) {
-  fs.writeFile(fn, data, "utf8", function(err, data) {
-    if (err) throw err;
-
-    cb(data);
-  });
-}
 
 app.listen(port);

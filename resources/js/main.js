@@ -66,7 +66,8 @@ function main() {
 
     $.ajax({
       type: "POST",
-      url: type.toLowerCase(),
+      url: (activityType)? (type + "?type=" + activityType.toLowerCase())
+                           : type.toLowerCase(),
       data: JSON.stringify(postObj),
       success: function() {
         alert("POST Request Success!");
