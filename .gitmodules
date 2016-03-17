@@ -1,0 +1,3 @@
+[submodule "my_mongo_connector"]
+	path = my_mongo_connector
+	url = https://github.com/comraq/my_mongo_connector
