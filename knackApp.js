@@ -39,8 +39,9 @@ app.get("*", function(req, res) {
     dbClient.find(colls[i], null, { _id: 0 }, function(err, docs) {
       if (err) {
         // Error Quering Database
-        res.writeHead(400, {"Content-Type": "text/plain"});
-        res.end("Error Querying Database for " + e + " collection !");
+        res.writeHead(500, {"Content-Type": "text/plain"});
+        res.end("Error Querying Database for "
+                + colls[i] + " collection!");
         return;
       }
       resJson[colls[i].slice(COLL_PREFIX.length)] = docs;
