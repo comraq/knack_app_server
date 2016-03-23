@@ -7,8 +7,7 @@ var express = require("express"),
 var app = express(),
     port = process.argv[2] || process.env.PORT || 8080,
     dbClient = mongoWrapper.client(),
-    COLL_PREFIX = "knack_",
-    JSON_PATH = "resources/json/";
+    COLL_PREFIX = "knack_";
 
 app.use(bodyParser.json());
 
@@ -125,7 +124,7 @@ app.post("*", function(req, res) {
   if (del)
     dbClient.deleteOne(coll, {id: keyId}, endPost);
   else
-    dbClient.updateOne(coll, req.body, endPost);
+    dbClient.updateOne(coll, "id", req.body, endPost);
 
   function endPost(err, results) {
     if (err) {

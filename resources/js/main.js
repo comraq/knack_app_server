@@ -71,7 +71,7 @@ function main() {
       url: (activityType)? (type + "?type=" + activityType.toLowerCase())
                            : type.toLowerCase(),
       data: JSON.stringify(postObj),
-      success: function() {
+      success: function(res) {
         alert("POST Request Success!");
       },
       error: function(textStatus, err) {
