@@ -5,7 +5,7 @@ var express = require("express"),
     fs = require("fs");
 
 var app = express(),
-    port = process.argv[2] || process.env.PORT || 8080,
+    port = process.argv[2] || process.env.PORT || 80,
     dbClient = mongoWrapper.client(),
     COLL_PREFIX = "knack_";
 
