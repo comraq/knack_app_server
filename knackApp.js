@@ -6,7 +6,13 @@ var express = require("express"),
 
 var app = express(),
     port = process.argv[2] || process.env.PORT || 80,
-    dbClient = mongoWrapper.client(),
+    dbParams = {
+                 hostname: "ds023088.mlab.com",
+                 port: 23088,
+                 user: "my_mongo_admin",
+                 password: "mymongopass"
+               },
+    dbClient = mongoWrapper.client(dbParams),
     COLL_PREFIX = "knack_";
 
 app.use(bodyParser.json());
